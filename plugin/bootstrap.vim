@@ -23,3 +23,4 @@ command! BootstrapChromatin call BootstrapChromatin()
 if get(g:, 'chromatin_autobootstrap', 1)
   BootstrapChromatin
 endif
+

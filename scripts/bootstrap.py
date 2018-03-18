@@ -1,7 +1,6 @@
 import os
 import sys
 import venv
-import logging
 from pathlib import Path
 from typing import Callable
 import subprocess
@@ -44,6 +43,15 @@ def echo(msg: str) -> None:
     amino_log(msg)
     if not development:
         nvim(lambda a: a.command(f'echo "{msg}"'))
+
+
+def tmpfile_error(msg: str) -> None:
+    try:
+        import tempfile
+        (fh, file) = tempfile.mkstemp(prefix='chromatin-bootstrap')
+        Path(file).write_text(msg)
+    except Exception as e:
+        pass
 
 
 def check_result(result: subprocess.CompletedProcess) -> None:
@@ -96,6 +104,7 @@ try:
 except Exception as e:
     msg = f'error while bootstrapping chromatin: {e}'
     try:
+        tmpfile_error(msg)
         echo(msg)
         amino_logger().caught_exception_error('bootstrapping chromatin', e)
     except Exception:
