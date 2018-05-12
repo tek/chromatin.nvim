@@ -77,6 +77,7 @@ def install(venv_dir: str, bin_path: Path) -> None:
     echo('installing chromatin...')
     req = sys.argv[2]
     pip = bin_path / 'pip'
+    subproc(str(pip), 'install', '-U', '--no-cache', 'pip')
     subproc(str(pip), 'install', '-U', '--no-cache', req)
 
 
