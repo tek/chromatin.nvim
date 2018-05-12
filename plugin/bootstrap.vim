@@ -7,7 +7,7 @@ let s:req = get(g:, 'chromatin_pip_req', 'chromatin')
 let s:py_exe = 'python3'
 
 function! ChromatinJobStderr(id, data, event) abort "{{{
-  echoerr 'error in chromatin rpc job on channel ' . a:id . ': ' . string(a:data)
+  echo 'error in chromatin rpc job on channel ' . a:id . ': ' . string(a:data)
 endfunction "}}}
 
 function! BootstrapChromatin() abort "{{{
