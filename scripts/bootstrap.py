@@ -2,25 +2,12 @@ import os
 import sys
 import venv
 from pathlib import Path
-from typing import Callable
 import subprocess
 from subprocess import PIPE
 
 nvim_inst = None
 amino_log_inst = None
 development = 'AMINO_DEVELOPMENT' in os.environ
-
-
-def nvim(f: Callable) -> None:
-    global nvim_inst
-    if nvim_inst is None:
-        try:
-            import neovim
-            nvim_inst = neovim.attach('stdio')
-        except Exception as e:
-            pass
-    if nvim_inst is not None:
-        f(nvim_inst)
 
 
 def amino_logger() -> None:
@@ -41,8 +28,6 @@ def amino_log(msg: str) -> None:
 
 def echo(msg: str) -> None:
     amino_log(msg)
-    if not development:
-        nvim(lambda a: a.command(f'echo "{msg}"'))
 
 
 def tmpfile_error(msg: str) -> None:
@@ -70,7 +55,8 @@ def subproc(*args: str, pipe: bool=True) -> None:
 
 
 def create_venv(dir: str) -> None:
-    subproc('python3', '-m', 'venv', str(dir), '--upgrade')
+    interpreter = os.environ.get('chromatin_interpreter', 'python3')
+    subproc(interpreter, '-m', 'venv', str(dir), '--upgrade')
 
 
 def install(venv_dir: str, bin_path: Path) -> None:

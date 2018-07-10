@@ -4,7 +4,8 @@ let s:venvs = get(g:, 'chromatin_venv_dir', s:default_venvs)
 let s:venv = s:venvs . '/chromatin'
 let s:script = fnamemodify(expand('<sfile>'), ':p:h:h') . '/scripts/bootstrap.py'
 let s:req = get(g:, 'chromatin_pip_req', 'chromatin')
-let s:py_exe = 'python3'
+let s:py_exe = get(g:, 'chromatin_interpreter', 'python3')
+let $chromatin_interpreter = s:py_exe
 
 function! ChromatinJobStderr(id, data, event) abort "{{{
   echo 'error in chromatin rpc job on channel ' . a:id . ': ' . string(a:data)
