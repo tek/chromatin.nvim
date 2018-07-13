@@ -1,6 +1,7 @@
 import os
 import sys
 import venv
+import logging
 from pathlib import Path
 import subprocess
 from subprocess import PIPE
@@ -41,21 +42,23 @@ def tmpfile_error(msg: str) -> None:
 
 def check_result(result: subprocess.CompletedProcess) -> None:
     msg = str(result).replace('"', '')
+    logging.debug(f'bootstrap subproc result: {result}')
     if result.returncode != 0:
-        s = f'subprocess failed: {msg}'
-        echo(s)
+        echo(f'subprocess failed: {msg}')
         sys.exit(1)
 
 
 def subproc(*args: str, pipe: bool=True) -> None:
-    env = dict(AMINO_DEVELOPMENT='1') if development else dict()
-    kw = dict(stdout=PIPE, stderr=PIPE) if pipe else dict()
-    result = subprocess.run(args, env=env, **kw)
+    isolate = sys.argv[4] == '1'
+    env = (dict(AMINO_DEVELOPMENT='1') if development else dict()) if isolate else None
+    kw = dict(stdout=PIPE) if pipe else dict()
+    logging.debug(f'bootstrap subproc: {args}')
+    result = subprocess.run(args, env=env, stderr=PIPE, **kw)
     check_result(result)
 
 
 def create_venv(dir: str) -> None:
-    interpreter = os.environ.get('chromatin_interpreter', 'python3')
+    interpreter = sys.argv[3]
     subproc(interpreter, '-m', 'venv', str(dir), '--upgrade')
 
 
@@ -68,7 +71,7 @@ def install(venv_dir: str, bin_path: Path) -> None:
 
 
 def start(run: Path, exe: str, bin: str, installed: int) -> None:
-    subproc(exe, str(run), exe, bin, str(installed), pipe=False)
+    subproc(exe, str(run), exe, bin, str(installed), sys.argv[5], pipe=False)
 
 
 def bootstrap() -> None:
@@ -86,6 +89,10 @@ def bootstrap() -> None:
     start(run, ns.env_exe, ns.bin_path, installed)
 
 try:
+    debug_log = sys.argv[5]
+    if debug_log:
+        logging.basicConfig(filename=debug_log, level=logging.DEBUG)
+    logging.debug('starting chromatin bootstrap')
     bootstrap()
     sys.exit(0)
 except Exception as e:
