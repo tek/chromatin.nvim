@@ -23,7 +23,7 @@ def amino_logger() -> None:
 
 def amino_log(msg: str) -> None:
     try:
-        amino_logger().debug(msg)
+        amino_logger().info(msg)
     except Exception as e:
         pass
 
