@@ -1,6 +1,7 @@
 import os
 import sys
 import venv
+import shutil
 import logging
 from pathlib import Path
 import subprocess
@@ -57,9 +58,27 @@ def subproc(*args: str, pipe: bool=True) -> None:
     check_result(result)
 
 
+def virtualenv_interpreter(venv: str, executable: str) -> str:
+    path = os.getenv('PATH', '').split(':')
+    clean_path = [a for a in path if not a.startswith(venv)]
+    candidate = shutil.which(executable, path=':'.join(clean_path))
+    if candidate is None:
+        raise Exception(f'no non-virtualenv python interpreter for `{executable}` found in $PATH')
+    return candidate
+
+
+def python_interpreter() -> str:
+    spec = sys.argv[3]
+    venv = os.getenv('VIRTUAL_ENV', '[no venv]')
+    return (
+        spec
+        if Path(spec).exists() else
+        virtualenv_interpreter(venv, spec)
+    )
+
+
 def create_venv(dir: str) -> None:
-    interpreter = sys.argv[3]
-    subproc(interpreter, '-m', 'venv', str(dir), '--upgrade')
+    subproc(python_interpreter(), '-m', 'venv', str(dir), '--upgrade')
 
 
 def install(venv_dir: str, bin_path: Path) -> None:
