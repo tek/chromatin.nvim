@@ -6,16 +6,18 @@ let s:script = fnamemodify(expand('<sfile>'), ':p:h:h') . '/scripts/bootstrap.py
 let s:req = get(g:, 'chromatin_pip_req', 'chromatin')
 let s:py_exe = get(g:, 'chromatin_interpreter', 'python3')
 let s:isolate = get(g:, 'chromatin_isolate', 1)
-let s:debug_log = get(g:, 'chromatin_bootstrap_debug_log', '')
 
 function! ChromatinJobStderr(id, data, event) abort "{{{
-  echo 'error in chromatin rpc job on channel ' . a:id . ': ' . string(a:data) . ' / ' . string(a:event)
+  call filter(a:data, 'len(v:val) > 0')
+  if len(a:data) > 0
+    echom 'error in chromatin rpc job on channel ' . a:id . ': ' . string(a:data) . ' / ' . string(a:event)
+  endif
 endfunction "}}}
 
 function! BootstrapChromatin() abort "{{{
   try
     call jobstart(
-          \ [s:py_exe, s:script, s:venv, s:req, s:py_exe, string(s:isolate), s:debug_log],
+          \ [s:py_exe, s:script, s:venv, s:req, s:py_exe, string(s:isolate)],
           \ { 'rpc': v:true, 'on_stderr': 'ChromatinJobStderr' },
           \ )
   catch //

@@ -10,42 +10,26 @@ from subprocess import PIPE
 nvim_inst = None
 amino_log_inst = None
 development = 'AMINO_DEVELOPMENT' in os.environ
-
-
-def amino_logger() -> None:
-    global amino_log_inst
-    if amino_log_inst is None:
-        from amino.logging import amino_root_logger, amino_root_file_logging
-        amino_root_file_logging()
-        amino_log_inst = amino_root_logger
-    return amino_log_inst
-
-
-def amino_log(msg: str) -> None:
-    try:
-        amino_logger().info(msg)
-    except Exception as e:
-        pass
+debug_env_var = 'CHROMATIN_DEBUG'
+debug_log_file = '/tmp/chromatin_debug'
 
 
 def echo(msg: str) -> None:
-    amino_log(msg)
-
-
-def tmpfile_error(msg: str) -> None:
-    try:
-        import tempfile
-        (fh, file) = tempfile.mkstemp(prefix='chromatin-bootstrap')
-        Path(file).write_text(msg)
-    except Exception as e:
-        pass
+    truncated = msg[:511]
+    padding = 511 - len(truncated)
+    padded = truncated + '\x00' * padding
+    data = b'\x93\x02\xaenvim_out_write\x91\xda\x02\x00' + padded.encode() + b'\n'
+    sys.stdout.buffer.write(data)
+    sys.stdout.flush()
+    logging.debug(msg)
 
 
 def check_result(result: subprocess.CompletedProcess) -> None:
     msg = str(result).replace('"', '')
     logging.debug(f'bootstrap subproc result: {result}')
     if result.returncode != 0:
-        echo(f'subprocess failed: {msg}')
+        echo('chromatin bootstrap process failed')
+        logging.debug(f'subprocess failed: {msg}')
         sys.exit(1)
 
 
@@ -90,7 +74,13 @@ def install(venv_dir: str, bin_path: Path) -> None:
 
 
 def start(run: Path, exe: str, bin: str, installed: int) -> None:
-    subproc(exe, str(run), exe, bin, str(installed), sys.argv[5], pipe=False)
+    subproc(exe, str(run), exe, bin, str(installed), pipe=False)
+
+
+def setup_debug_log() -> None:
+    if development or debug_env_var in os.environ:
+        logging.basicConfig(filename=debug_log_file, level=logging.DEBUG)
+    logging.debug('starting chromatin bootstrap')
 
 
 def bootstrap() -> None:
@@ -108,18 +98,13 @@ def bootstrap() -> None:
     start(run, ns.env_exe, ns.bin_path, installed)
 
 try:
-    debug_log = sys.argv[5]
-    if debug_log:
-        logging.basicConfig(filename=debug_log, level=logging.DEBUG)
-    logging.debug('starting chromatin bootstrap')
+    setup_debug_log()
     bootstrap()
     sys.exit(0)
 except Exception as e:
     msg = f'error while bootstrapping chromatin: {e}'
     try:
-        tmpfile_error(msg)
-        echo(msg)
-        amino_logger().caught_exception_error('bootstrapping chromatin', e)
+        echo(f'fatal error while initializing chromatin. set ${debug_env_var} and inspect {debug_log_file}')
+        logging.debug(msg)
     except Exception:
-        print(msg, file=sys.stderr)
-    sys.exit(1)
+        sys.exit(1)
