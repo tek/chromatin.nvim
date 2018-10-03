@@ -23,7 +23,7 @@ your plugins.
 # Usage
 
 ## Declare
-When starting, **chromatin** reads plugin configuration from `g:chromating_rplugins`:
+When starting, **chromatin** reads plugin configuration from `g:chromatin_rplugins`:
 
 ```viml
 let g:chromatin_rplugins = [
