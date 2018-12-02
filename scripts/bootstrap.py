@@ -28,9 +28,7 @@ def check_result(result: subprocess.CompletedProcess) -> None:
     msg = str(result).replace('"', '')
     logging.debug(f'bootstrap subproc result: {result}')
     if result.returncode != 0:
-        echo('chromatin bootstrap process failed')
-        logging.debug(f'subprocess failed: {msg}')
-        sys.exit(1)
+        raise Exception(f'subprocess failed: {msg}')
 
 
 def subproc(*args: str, pipe: bool=True) -> None:
@@ -107,4 +105,5 @@ except Exception as e:
         echo(f'fatal error while initializing chromatin. set ${debug_env_var} and inspect {debug_log_file}')
         logging.debug(msg)
     except Exception:
-        sys.exit(1)
+        pass
+    sys.exit(1)
