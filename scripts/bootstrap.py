@@ -102,8 +102,8 @@ try:
 except Exception as e:
     msg = f'error while bootstrapping chromatin: {e}'
     try:
-        echo(f'fatal error while initializing chromatin. set ${debug_env_var} and inspect {debug_log_file}')
         logging.debug(msg)
+        echo(f'fatal error while initializing chromatin. set ${debug_env_var} and inspect {debug_log_file}')
     except Exception:
         pass
     sys.exit(1)
