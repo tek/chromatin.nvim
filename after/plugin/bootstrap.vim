@@ -41,6 +41,10 @@ function! s:job(cmd, output, next, error) abort "{{{
   silent! wincmd w
 endfunction "}}}
 
+function! s:run_chromatin() abort "{{{
+  return jobstart(s:crm_hs_exe, { 'rpc': v:true })
+endfunction "}}}
+
 function! s:install_chromatin() abort "{{{
   echom 'chromatin: installing chromatin…'
   return s:job(s:cabal_exe . ' v1-install chromatin', 'install-chromatin', 's:run_chromatin', 'failed to install chromatin')
