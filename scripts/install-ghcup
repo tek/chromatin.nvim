@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -e
+
+mkdir -p ~/.ghcup/bin
+curl https://raw.githubusercontent.com/haskell/ghcup/master/ghcup -o ~/.ghcup/bin/ghcup
+chmod +x ~/.ghcup/bin/ghcup
