@@ -85,10 +85,10 @@ function! s:bootstrap() abort "{{{
   endif
 endfunction "}}}
 
-if get(g:, 'chromatin_autobootstrap', 1)
-  if get(g:, 'chromatin_haskell', 0) || $CHROMATIN_HASKELL != ''
-    augroup ChromatinBootstrap
-      autocmd VimEnter * nested call s:bootstrap()
-    augroup END
-  endif
-endif
+" if get(g:, 'chromatin_autobootstrap', 1)
+"   if get(g:, 'chromatin_haskell', 0) || $CHROMATIN_HASKELL != ''
+"     augroup ChromatinBootstrap
+"       autocmd VimEnter * nested call s:bootstrap()
+"     augroup END
+"   endif
+" endif
